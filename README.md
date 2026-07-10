@@ -10,5 +10,5 @@ An AI-powered platform that ingests signals from engineering and PM tools (GitHu
 - `workflows/exported-workflows/` — exported n8n workflow JSON files
 - `screenshots/` — UI and workflow screenshots
 
-## Getting Started
+
 
