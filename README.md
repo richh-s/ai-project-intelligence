@@ -12,4 +12,3 @@ An AI-powered platform that ingests signals from engineering and PM tools (GitHu
 
 ## Getting Started
 
-See [docs/01-Software-Requirements.md](docs/01-Software-Requirements.md) for scope and requirements, and [docs/02-System-Architecture.md](docs/02-System-Architecture.md) for the system design.
