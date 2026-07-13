@@ -10,5 +10,8 @@ An AI-powered platform that ingests signals from engineering and PM tools (GitHu
 - `workflows/exported-workflows/` — exported n8n workflow JSON files
 - `screenshots/` — UI and workflow screenshots
 
+## Status
+
+Currently building out the n8n workflow layer (Project Setup → Health Score, plus reconciliation, notification dispatch, escalation, and leadership summary workflows).
 
 
