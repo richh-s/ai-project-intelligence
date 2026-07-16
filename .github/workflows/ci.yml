@@ -1,0 +1,14 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  create:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder check
+        run: echo "CI placeholder - exists to generate workflow_run events for the Phoenix Sync n8n workflow test"
