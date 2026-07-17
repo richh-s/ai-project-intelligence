@@ -22,6 +22,7 @@ CREATE TABLE projects (
     name TEXT NOT NULL,
     description TEXT,
     slack_channel_id TEXT,
+    dev_activity_channel_id TEXT,
     jira_project_key TEXT,
     github_repo TEXT,
     drive_folder_id TEXT,
