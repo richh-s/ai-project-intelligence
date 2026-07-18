@@ -94,7 +94,24 @@ CREATE TABLE daily_updates (
     next_work TEXT,
     blockers TEXT,
     additional_notes TEXT,
-    submitted_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    standup_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (project_id, developer_id, standup_date)
+);
+
+-- One row per standup ask (or other Slack prompt) sent to a developer, so a
+-- thread reply can be matched back to the exact prompt it answers via
+-- slack_channel_id + slack_ts, instead of any reply in the channel being
+-- treated as a standup update.
+CREATE TABLE standup_prompts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    developer_id UUID NOT NULL REFERENCES developers(id) ON DELETE CASCADE,
+    slack_channel_id TEXT NOT NULL,
+    slack_ts TEXT NOT NULL,
+    question_type TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE meetings (
@@ -245,6 +262,8 @@ CREATE INDEX idx_tasks_project ON tasks(project_id);
 CREATE INDEX idx_tasks_owner ON tasks(owner);
 CREATE INDEX idx_daily_updates_project ON daily_updates(project_id);
 CREATE INDEX idx_daily_updates_developer ON daily_updates(developer_id);
+CREATE INDEX idx_standup_prompts_slack_ts ON standup_prompts(slack_channel_id, slack_ts);
+CREATE INDEX idx_standup_prompts_project ON standup_prompts(project_id);
 CREATE INDEX idx_meetings_project ON meetings(project_id);
 CREATE INDEX idx_pr_activity_project ON pr_activity(project_id);
 CREATE INDEX idx_documents_project ON documents(project_id);
@@ -268,8 +287,8 @@ CREATE ROLE app_user WITH LOGIN PASSWORD 'app_password' NOSUPERUSER;
 GRANT USAGE ON SCHEMA public TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON
     projects, developers, project_members, sources, tasks, daily_updates,
-    meetings, pr_activity, documents, raw_events, vectors, project_health,
-    daily_briefs, notifications, agent_logs
+    standup_prompts, meetings, pr_activity, documents, raw_events, vectors,
+    project_health, daily_briefs, notifications, agent_logs
     TO app_user;
 
 DO $$
@@ -278,8 +297,8 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'projects', 'developers', 'project_members', 'sources', 'tasks', 'daily_updates',
-        'meetings', 'pr_activity', 'documents', 'raw_events', 'vectors', 'project_health',
-        'daily_briefs', 'notifications', 'agent_logs'
+        'standup_prompts', 'meetings', 'pr_activity', 'documents', 'raw_events', 'vectors',
+        'project_health', 'daily_briefs', 'notifications', 'agent_logs'
     ]
     LOOP
         EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
